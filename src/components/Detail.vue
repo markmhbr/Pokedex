@@ -16,42 +16,25 @@ const modalPokemon = ref(null)
 
 // --- Fitur Catch ---
   
+// --- Fitur Catch ---
 async function attemptCatch() {
-    showModal.value = true
-    catchInProgress.value = true
+    showModal.value = true;
+    catchInProgress.value = true;
+
     // Tampilkan animasi catch selama 3 detik
     setTimeout(async () => {
-      catchInProgress.value = false
-      // Kesempatan menangkap dinaikkan menjadi 90%
-      const success = Math.random() < 0.9
-      if (success) {
-        modalPokemon.value = await fetchRandomPokemon()
-      } else {
-        modalPokemon.value = null
-      }
-      // Jika gagal, modal tetap terbuka (user harus klik tombol "Tutup")
-    }, 3000)
-  }
+        catchInProgress.value = false;
 
-// Fungsi untuk mengambil Pokémon acak saat berhasil menangkap
-async function fetchRandomPokemon() {
-    try {
-        const randomId = Math.floor(Math.random() * 151) + 1; // Pokémon dari 1-151 (Generasi 1)
-        const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${randomId}`);
-        if (!response.ok) throw new Error("Gagal mengambil Pokémon!");
-
-        const data = await response.json();
-        return {
-            id: data.id,
-            name: data.name.charAt(0).toUpperCase() + data.name.slice(1),
-            image: data.sprites.other["official-artwork"].front_default || "/default.png",
-            types: data.types.map(t => t.type.name),
-        };
-    } catch (error) {
-        console.error("Error fetching random Pokémon:", error);
-        return null;
-    }
+        // Kesempatan menangkap dinaikkan menjadi 90%
+        const success = Math.random() < 0.5;
+        if (success) {
+            modalPokemon.value = { ...pokemon.value }; // Tangkap Pokémon yang sedang ditampilkan
+        } else {
+            modalPokemon.value = null;
+        }
+    }, 3000);
 }
+
 
 // Fungsi untuk menyimpan Pokémon ke koleksi pemain
 function capturePokemon() {
@@ -70,27 +53,6 @@ function closeModal() {
     modalPokemon.value = null;
 }
 
-
-const typeColors = {
-  grass: "bg-green-500",
-  fire: "bg-red-500",
-  water: "bg-blue-500",
-  electric: "bg-yellow-400",
-  psychic: "bg-purple-500",
-  ice: "bg-cyan-300",
-  dragon: "bg-indigo-600",
-  dark: "bg-gray-800",
-  fairy: "bg-pink-300",
-  normal: "bg-gray-400",
-  fighting: "bg-orange-600",
-  flying: "bg-sky-400",
-  poison: "bg-purple-400",
-  ground: "bg-yellow-700",
-  rock: "bg-yellow-800",
-  bug: "bg-lime-500",
-  ghost: "bg-indigo-400",
-  steel: "bg-gray-500",
-};
 
 async function fetchPokemonByName(name) {
   try {
@@ -122,6 +84,28 @@ async function fetchPokemonByName(name) {
   } finally {
     isLoading.value = false;
   }
+};
+
+
+const typeColors = {
+  grass: "bg-green-500",
+  fire: "bg-red-500",
+  water: "bg-blue-500",
+  electric: "bg-yellow-400",
+  psychic: "bg-purple-500",
+  ice: "bg-cyan-300",
+  dragon: "bg-indigo-600",
+  dark: "bg-gray-800",
+  fairy: "bg-pink-300",
+  normal: "bg-gray-400",
+  fighting: "bg-orange-600",
+  flying: "bg-sky-400",
+  poison: "bg-purple-400",
+  ground: "bg-yellow-700",
+  rock: "bg-yellow-800",
+  bug: "bg-lime-500",
+  ghost: "bg-indigo-400",
+  steel: "bg-gray-500",
 };
 
 onMounted(() => {
@@ -259,8 +243,8 @@ onMounted(() => {
                             </p>
                             <div class="w-full bg-white rounded-full h-3">
                                 <div
-                                  class="bg-yellow-400 h-3 rounded-full transition-all duration-300"
-                                  :style="{ width: stat.base_stat + '%' }"
+                                  class="bg-yellow-400 h-3 rounded-full transition-all duration-300 overflow-hidden"
+                                  :style="{ width: Math.min(stat.base_stat,100) + '%' }"
                                 ></div>
                             </div>
                         </div>
@@ -277,7 +261,7 @@ onMounted(() => {
             <!-- Modal Catch -->
             <div
               v-if="showModal"
-              class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
+              class="fixed inset-0 flex items-center justify-center opacity-90 z-50"
             >
               <div class="bg-white p-6 rounded-2xl w-80">
                 <div v-if="catchInProgress" class="text-center">
@@ -290,7 +274,7 @@ onMounted(() => {
                   />
                 </div>
                 <div v-else>
-                  <div v-if="modalPokemon">
+                  <div v-if="modalPokemon" >
                     <div class="text-center mb-4">
                       <img :src="modalPokemon.image" :alt="modalPokemon.name" class="w-40 mx-auto" />
                       <p class="font-extra text-xl mt-2">{{ modalPokemon.name }}</p>
